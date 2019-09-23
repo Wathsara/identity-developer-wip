@@ -1,14 +1,15 @@
-# LSP Example
+# Identity Developer Language support
 
-Heavily documented sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+Based on  https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
 
 ## Functionality
 
 This Language Server works for plain text file. It has the following language features:
 - Completions
 - Diagnostics regenerated on each file change or configuration change
+- Connects to remote websocket (currntly only on localhost)
 
-It also includes an End-to-End test.
+
 
 ## Structure
 
