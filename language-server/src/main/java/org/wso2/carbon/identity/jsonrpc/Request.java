@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.jsonrpc;
 
+import com.google.gson.stream.JsonReader;
+
 /**
  * JSON RPC Request
  */

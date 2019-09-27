@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" ignored="0" total="2" passed="2">
+  <reporter-output>
+  </reporter-output>
+  <suite name="org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest" duration-ms="60" started-at="2019-09-27T06:28:28Z" finished-at="2019-09-27T06:28:28Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="60" started-at="2019-09-27T06:28:28Z" finished-at="2019-09-27T06:28:28Z">
+      <class name="org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest">
+        <test-method status="PASS" signature="setUp()[pri:0, instance:org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest@5cc7c2a6]" name="setUp" is-config="true" duration-ms="41" started-at="2019-09-27T06:28:28Z" finished-at="2019-09-27T06:28:28Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setUp -->
+        <test-method status="PASS" signature="testDeserialize()[pri:0, instance:org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest@5cc7c2a6]" name="testDeserialize" duration-ms="5" started-at="2019-09-27T06:28:28Z" finished-at="2019-09-27T06:28:28Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testDeserialize -->
+        <test-method status="PASS" signature="testSuccessSerialize()[pri:0, instance:org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest@5cc7c2a6]" name="testSuccessSerialize" duration-ms="3" started-at="2019-09-27T06:28:28Z" finished-at="2019-09-27T06:28:28Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSuccessSerialize -->
+      </class> <!-- org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest -->
+    </test> <!-- Command line test -->
+  </suite> <!-- org.wso2.carbon.identity.jsonrpc.serializer.RequestDeserializerTest -->
+</testng-results>

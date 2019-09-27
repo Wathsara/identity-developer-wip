@@ -18,11 +18,17 @@
 
 package org.wso2.carbon.identity.jsonrpc;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 /**
  * Abstract class for success and error responses.
  *
  */
 public abstract class Response {
+
 
     /**
      * The id of the request
@@ -30,6 +36,16 @@ public abstract class Response {
     private String id;
 
     private final String jsonrpc = "2.0";
+
+    public String getTestResult() {
+        return testResult;
+    }
+
+    public void setTestResult(String testResult) {
+        this.testResult = testResult;
+    }
+
+    private String testResult;
 
     public String getId() {
 
@@ -45,4 +61,6 @@ public abstract class Response {
 
         return jsonrpc;
     }
+
+
 }

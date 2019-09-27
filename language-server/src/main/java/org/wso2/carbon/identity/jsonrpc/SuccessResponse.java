@@ -28,7 +28,6 @@ public class SuccessResponse extends Response {
     private JsonElement result;
 
     public JsonElement getResult() {
-
         return result;
     }
 

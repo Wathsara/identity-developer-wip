@@ -18,7 +18,8 @@ import {
 } from 'vscode-languageserver';
 
 import * as rpc from 'vscode-ws-jsonrpc';
-
+import * as server from 'vscode-ws-jsonrpc/lib/server';
+import { stringify } from 'querystring';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -31,7 +32,7 @@ let documents: TextDocuments = new TextDocuments();
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
-let ws = createWebsocket();
+// var ws = createWebsocket();
 
 function createWebsocket() {
 	var WebSocket = require('ws');
@@ -49,7 +50,7 @@ function createWebsocket() {
 }
 
 connection.onInitialize((params: InitializeParams) => {
-	
+
 	let capabilities = params.capabilities;
 
 	// Does the client support the `workspace/configuration` request?
@@ -81,12 +82,7 @@ connection.onInitialized(() => {
 	if (hasConfigurationCapability) {
 		// Register for all configuration changes.
 		connection.client.register(DidChangeConfigurationNotification.type, undefined);
-	}
-	if (hasWorkspaceFolderCapability) {
-		connection.workspace.onDidChangeWorkspaceFolders(_event => {
-			connection.console.log('Workspace folder change event received.');
-		});
-	}
+	}	
 });
 
 // The example settings
@@ -144,6 +140,7 @@ documents.onDidChangeContent(change => {
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+
 	// In this simple example we get the settings for every validate run.
 	let settings = await getDocumentSettings(textDocument.uri);
 
@@ -201,18 +198,42 @@ connection.onCompletion(
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the example we ignore this
 		// info and always provide the same completion items.
+		
+		var WebSocket = require('ws');
+		var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');
+		var initialize = "null";
+		rpc.listen({
+			webSocket,
+			onConnection: (rpcConnection: rpc.MessageConnection) => {
+				const notification = new rpc.NotificationType<any, void>('onCompletion');
+				rpcConnection.listen();
+				rpcConnection.sendNotification(notification, JSON.stringify(_textDocumentPosition));
+				console.log("yawwa spaams+ ");
+			},
+		});		
+
+		webSocket.on('message', function incoming(data: any) {				
+			console.log("Recieved "+data);
+			console.log("Recieved data type "+ typeof data);
+			let obj = JSON.parse(data);
+			console.log("Recieved id type "+ obj.id);			
+		});	
+
+		
 		return [
 			{
-				label: 'TypeScript',
+				label: initialize,
 				kind: CompletionItemKind.Text,
 				data: 1
-			},
+			},			
 			{
 				label: 'JavaScript',
 				kind: CompletionItemKind.Text,
 				data: 2
 			}
-		];
+		];	
+		
+
 	}
 );
 
@@ -238,10 +259,10 @@ connection.onDidOpenTextDocument((params) => {
 	// params.text the initial full content of the document.
 	connection.console.log(`${params.textDocument.uri} opened.`);
 });
-connection.onDidChangeTextDocument((params) => {
-	// The content of a text document did change in VSCode.
-	// params.uri uniquely identifies the document.
-	// params.contentChanges describe the content changes to the document.
+connection.onDidChangeTextDocument(onInitialize(params) => {
+	// The content of a text documeonInitializent did change in VSCode.
+	// params.uri uniquely identifionInitializees the document.
+	// params.contentChanges descrionInitializebe the content changes to the document.
 	connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`);
 });
 connection.onDidCloseTextDocument((params) => {

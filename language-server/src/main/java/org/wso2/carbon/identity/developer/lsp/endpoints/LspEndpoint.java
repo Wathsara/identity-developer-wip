@@ -18,19 +18,16 @@
 
 package org.wso2.carbon.identity.developer.lsp.endpoints;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.wso2.carbon.identity.developer.lsp.LanguageProcessor;
 import org.wso2.carbon.identity.developer.lsp.LanguageProcessorFactory;
-import org.wso2.carbon.identity.jsonrpc.ErrorResponse;
-import org.wso2.carbon.identity.jsonrpc.JsonRPC;
-import org.wso2.carbon.identity.jsonrpc.Request;
-import org.wso2.carbon.identity.jsonrpc.Response;
+import org.wso2.carbon.identity.jsonrpc.*;
 
 import java.io.IOException;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
 /**
@@ -62,9 +59,13 @@ public class LspEndpoint {
 
         System.out.println(session.getId() + " has opened a connection");
         try {
-            session.getBasicRemote().sendText("Connection Established");
+            Gson gson = new Gson();
+//            session.getBasicRemote().sendText("enwada");
+            session.getBasicRemote().sendObject(gson.toJson("Hello"));
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (EncodeException e) {
+            e.printStackTrace();
         }
     }
 
@@ -84,24 +85,25 @@ public class LspEndpoint {
      * Method intercepts the message and allows us to react accordingly.
      */
     @OnMessage
-    public void onMessage(String message, Session session) {
-
-        System.out.println("Message from " + session.getId() + ": " + message);
+    public void onMessage(String message, Session session) throws IOException, EncodeException {
 
         try {
-
             Request request = jsonRPC.decode(message);
             LanguageProcessor languageProcessor = languageProcessorFactory.getProcessor(request);
-            Response response;
+            SuccessResponse response = new SuccessResponse();
             if(languageProcessor == null) {
                 //TODO: Descriptive error, no processor found
-                response = new ErrorResponse();
+                response = new SuccessResponse();
+
             } else {
-                response = languageProcessor.process(request);
+                JsonElement jsonElement1 = new JsonParser().parse(message);
+                response.setId(request.getMethod());
+                JsonElement jsonElement2 = new JsonParser().parse(jsonElement1.getAsJsonObject().get("params").getAsString());
+                response.setResult(jsonElement2);
             }
             if(response == null) {
                 //TODO: Descriptive error
-                response = new ErrorResponse();
+                response = new SuccessResponse();
             }
             session.getBasicRemote().sendText(jsonRPC.encode(response));
         } catch (IOException ex) {
@@ -114,6 +116,8 @@ public class LspEndpoint {
      *
      * @param e
      */
+
+
     @OnError
     public void onError(Throwable e) {
 
