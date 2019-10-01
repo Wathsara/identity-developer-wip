@@ -16,22 +16,39 @@ import java.util.Map;
 
 
 public class ParserT {
-
     private static final Gson PRETTY_PRINT_GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Gson GSON = new Gson();
+    private String scope = null;
 
-
-    public static String toJson(ParseTree tree, boolean prettyPrint) {
-        return prettyPrint ? PRETTY_PRINT_GSON.toJson(toMap(tree)) : GSON.toJson(toMap(tree));
+    public ParserT(){
+        scope = null;
     }
 
-    public static Map<String, Object> toMap(ParseTree tree) {
+    public  String getScope() {
+        return scope;
+    }
+
+    public  void setScope(String scope) {
+        this.scope = scope;
+    }
+
+
+    public  List getMyList() {
+        return myList;
+    }
+
+    private  List myList = new ArrayList();
+    public  String toJson(ParseTree tree, boolean prettyPrint ,int line , int charPosition) {
+        return prettyPrint ? PRETTY_PRINT_GSON.toJson(toMap(tree , line , charPosition)) : GSON.toJson(toMap(tree , line , charPosition));
+    }
+
+    public  String toMap(ParseTree tree ,int line , int charPosition) {
         Map<String, Object> map = new LinkedHashMap<>();
-        traverse(tree, map);
-        return map;
+        traverse(tree, map, line , charPosition);
+        return this.scope;
     }
 
-    public static void traverse(ParseTree tree, Map<String, Object> map) {
+    public  void traverse(ParseTree tree, Map<String, Object> map , int line , int charPosition) {
 
         if (tree instanceof TerminalNodeImpl) {
             Token token = ((TerminalNodeImpl) tree).getSymbol();
@@ -46,13 +63,22 @@ public class ParserT {
             for (int i = 0; i < tree.getChildCount(); i++) {
                 Map<String, Object> nested = new LinkedHashMap<>();
                 children.add(nested);
-                traverse(tree.getChild(i), nested);
+
+                if (tree.getChild(i) instanceof TerminalNodeImpl) {
+                    Token token1 = ((TerminalNodeImpl) tree.getChild(i)).getSymbol();
+                    if ((token1.getLine() == line && token1.getCharPositionInLine() < charPosition)) {
+                       this.scope = name;
+                    }else if((token1.getLine()<line)){
+                        this.scope = name;
+                    }
+                }
+                traverse(tree.getChild(i), nested, line, charPosition);
             }
         }
 
     }
 
-    public static String generateParseTree(String code) throws ScriptException {
+    public  String generateParseTree(String code , int line , int charPosition) throws ScriptException {
         try{
             CharStream charStream = CharStreams.fromString(code);
             JavaScriptLexer javaScriptLexer =new JavaScriptLexer(charStream);
@@ -61,13 +87,12 @@ public class ParserT {
             javaScriptParser.removeErrorListeners();
             javaScriptParser.addErrorListener(new JavaScriptErrorListner());
             ParseTree parseTree = javaScriptParser.program();
-           return toJson(parseTree,true);
 
+            return this.toMap(parseTree,line,charPosition);
         }catch (Exception e){
            System.out.println(e);
 
         }
-
-        return code;
+        return this.getScope();
     }
 }

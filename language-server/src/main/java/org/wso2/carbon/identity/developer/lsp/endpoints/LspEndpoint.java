@@ -25,8 +25,10 @@ import com.google.gson.JsonParser;
 import org.wso2.carbon.identity.developer.lsp.LanguageProcessor;
 import org.wso2.carbon.identity.developer.lsp.LanguageProcessorFactory;
 import org.wso2.carbon.identity.jsonrpc.*;
+import org.wso2.carbon.identity.parser.ParserT;
 
 import java.io.IOException;
+import javax.script.ScriptException;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
@@ -94,19 +96,23 @@ public class LspEndpoint {
             if(languageProcessor == null) {
                 //TODO: Descriptive error, no processor found
                 response = new SuccessResponse();
-
             } else {
                 JsonElement jsonElement1 = new JsonParser().parse(message);
-                response.setId(request.getMethod());
                 JsonElement jsonElement2 = new JsonParser().parse(jsonElement1.getAsJsonObject().get("params").getAsString());
-                response.setResult(jsonElement2);
+                int line = Integer.parseInt(jsonElement2.getAsJsonObject().get("line").getAsString());
+                int charPosition = Integer.parseInt(jsonElement2.getAsJsonObject().get("character").getAsString());
+
+                ParserT parserT = new ParserT();
+//                response.setId(String.valueOf(line) + " ----> "+ String.valueOf(charPosition));
+               response.setId(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition));
+//                response.setResult(new JsonParser().parse(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition)));
             }
             if(response == null) {
                 //TODO: Descriptive error
                 response = new SuccessResponse();
             }
             session.getBasicRemote().sendText(jsonRPC.encode(response));
-        } catch (IOException ex) {
+        } catch (IOException | ScriptException ex) {
             ex.printStackTrace();
         }
     }

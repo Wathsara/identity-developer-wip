@@ -38,7 +38,7 @@ public class SuccessResponseSerializer implements JsonSerializer<SuccessResponse
 
         object.addProperty("jsonrpc", successResponse.getJsonrpc());
         object.addProperty("id", successResponse.getId());
-        object.add("params", successResponse.getResult());
+        object.add("result", successResponse.getResult());
 
         return object;
     }

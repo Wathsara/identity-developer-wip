@@ -32,27 +32,11 @@ let documents: TextDocuments = new TextDocuments();
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
-// var ws = createWebsocket();
 
-function createWebsocket() {
-	var WebSocket = require('ws');
-	var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');
+declare var text : String;
 
-	rpc.listen({
-		webSocket,
-		onConnection: (rpcConnection: rpc.MessageConnection) => {
-			const notification = new rpc.NotificationType<string, void>('testNotification');
-			rpcConnection.listen();
-			rpcConnection.sendNotification(notification, 'Hello World');
-		}
-	});
-	return webSocket;
-}
-
-connection.onInitialize((params: InitializeParams) => {
-
+connection.onInitialize((params: InitializeParams) => {	
 	let capabilities = params.capabilities;
-
 	// Does the client support the `workspace/configuration` request?
 	// If not, we will fall back using global settings
 	hasConfigurationCapability = !!(
@@ -133,10 +117,14 @@ documents.onDidClose(e => {
 	documentSettings.delete(e.document.uri);
 });
 
+var text:String;
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
+	text = change.document.getText();
+	
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
@@ -182,7 +170,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		}
 		diagnostics.push(diagnostic);
 	}
-
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
@@ -191,7 +178,7 @@ connection.onDidChangeWatchedFiles(_change => {
 	// Monitored files have change in VSCode
 	connection.console.log('We received an file change event');
 });
-
+var recieveData:any = "hi";
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
 	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
@@ -202,21 +189,28 @@ connection.onCompletion(
 		var WebSocket = require('ws');
 		var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');
 		var initialize = "null";
+		var obj:any = {
+			"text" : text,
+			"line" : _textDocumentPosition.position.line,
+			"character":_textDocumentPosition.position.character
+		};
+		var output = <JSON>obj;
 		rpc.listen({
 			webSocket,
 			onConnection: (rpcConnection: rpc.MessageConnection) => {
 				const notification = new rpc.NotificationType<any, void>('onCompletion');
-				rpcConnection.listen();
-				rpcConnection.sendNotification(notification, JSON.stringify(_textDocumentPosition));
+				rpcConnection.listen();				
+				rpcConnection.sendNotification(notification, JSON.stringify(output));
 				console.log("yawwa spaams+ ");
 			},
-		});		
+		});	
 
 		webSocket.on('message', function incoming(data: any) {				
 			console.log("Recieved "+data);
 			console.log("Recieved data type "+ typeof data);
 			let obj = JSON.parse(data);
-			console.log("Recieved id type "+ obj.id);			
+			console.log("Recieved id type "+ obj.id);
+			recieveData = obj.id;			
 		});	
 
 		
@@ -227,7 +221,7 @@ connection.onCompletion(
 				data: 1
 			},			
 			{
-				label: 'JavaScript',
+				label: recieveData,
 				kind: CompletionItemKind.Text,
 				data: 2
 			}
