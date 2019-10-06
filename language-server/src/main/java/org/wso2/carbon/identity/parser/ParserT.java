@@ -2,10 +2,7 @@ package org.wso2.carbon.identity.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import javax.script.ScriptException;
@@ -19,9 +16,11 @@ public class ParserT {
     private static final Gson PRETTY_PRINT_GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Gson GSON = new Gson();
     private String scope = null;
+    private List blocks = new ArrayList();
 
     public ParserT(){
         scope = null;
+
     }
 
     public  String getScope() {
@@ -42,13 +41,21 @@ public class ParserT {
         return prettyPrint ? PRETTY_PRINT_GSON.toJson(toMap(tree , line , charPosition)) : GSON.toJson(toMap(tree , line , charPosition));
     }
 
-    public  String toMap(ParseTree tree ,int line , int charPosition) {
+    public String toMap(ParseTree tree ,int line , int charPosition) {
         Map<String, Object> map = new LinkedHashMap<>();
         traverse(tree, map, line , charPosition);
-        return this.scope;
+//        return String.valueOf(this.blocks);
+        if(this.blocks.size() == 0){
+            return "Program";
+        }else if(String.valueOf(this.blocks.get(0)).equals("Eos") && this.blocks.size() > 0){
+            return String.valueOf(this.blocks.get(1));
+        }else{
+            return String.valueOf(this.blocks.get(0));
+        }
+
     }
 
-    public  void traverse(ParseTree tree, Map<String, Object> map , int line , int charPosition) {
+    public void traverse(ParseTree tree, Map<String, Object> map , int line , int charPosition) {
 
         if (tree instanceof TerminalNodeImpl) {
             Token token = ((TerminalNodeImpl) tree).getSymbol();
@@ -63,17 +70,25 @@ public class ParserT {
             for (int i = 0; i < tree.getChildCount(); i++) {
                 Map<String, Object> nested = new LinkedHashMap<>();
                 children.add(nested);
-
-                if (tree.getChild(i) instanceof TerminalNodeImpl) {
-                    Token token1 = ((TerminalNodeImpl) tree.getChild(i)).getSymbol();
-                    if ((token1.getLine() == line && token1.getCharPositionInLine() < charPosition)) {
-                       this.scope = name;
-                    }else if((token1.getLine()<line)){
-                        this.scope = name;
+                if(!(tree.getChild(i) instanceof TerminalNodeImpl)){
+                    String blockName = tree.getChild(i).getClass().getSimpleName().replaceAll("Context$", "");
+                    int startLine , startCharPosition,stopLine,stopCharPosition = 0;
+                    startLine = (((ParserRuleContext) tree).start).getLine();
+                    startCharPosition = (((ParserRuleContext) tree).start).getCharPositionInLine();
+                    if((((ParserRuleContext) tree).stop)!= null){
+                        stopLine = (((ParserRuleContext) tree).stop).getLine();
+                        stopCharPosition = (((ParserRuleContext) tree).stop).getCharPositionInLine();
+                    }else {
+                        stopLine = line;
+                        stopCharPosition = charPosition+1;
                     }
+                    if (((startLine < line) || (startLine == line && startCharPosition <= charPosition)) && ((stopLine > line) || (stopLine == line && stopCharPosition >= charPosition))) {
+                        this.blocks.add(0,blockName);
+                    }
+                    traverse(tree.getChild(i), nested, line, charPosition);
                 }
-                traverse(tree.getChild(i), nested, line, charPosition);
             }
+
         }
 
     }

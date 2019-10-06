@@ -124,6 +124,8 @@ var text:String;
 documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 	text = change.document.getText();
+	console.log(change)
+
 	
 });
 
@@ -181,17 +183,16 @@ connection.onDidChangeWatchedFiles(_change => {
 var recieveData:any = "hi";
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+	async (_textDocumentPosition: TextDocumentPositionParams): Promise<CompletionItem[]> => {
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the example we ignore this
 		// info and always provide the same completion items.
 		
 		var WebSocket = require('ws');
-		var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');
-		var initialize = "null";
+		var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');		
 		var obj:any = {
 			"text" : text,
-			"line" : _textDocumentPosition.position.line,
+			"line" : _textDocumentPosition.position.line+1,
 			"character":_textDocumentPosition.position.character
 		};
 		var output = <JSON>obj;
@@ -201,11 +202,11 @@ connection.onCompletion(
 				const notification = new rpc.NotificationType<any, void>('onCompletion');
 				rpcConnection.listen();				
 				rpcConnection.sendNotification(notification, JSON.stringify(output));
-				console.log("yawwa spaams+ ");
+				console.log("yawwa spaams+ " + output);
 			},
 		});	
 
-		webSocket.on('message', function incoming(data: any) {				
+		await webSocket.on('message', function incoming(data: any) {				
 			console.log("Recieved "+data);
 			console.log("Recieved data type "+ typeof data);
 			let obj = JSON.parse(data);
@@ -213,7 +214,7 @@ connection.onCompletion(
 			recieveData = obj.id;			
 		});	
 
-		
+		var initialize = "null";
 		return [
 			{
 				label: initialize,
@@ -259,6 +260,7 @@ connection.onDidChangeTextDocument(onInitialize(params) => {
 	// params.contentChanges descrionInitializebe the content changes to the document.
 	connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`);
 });
+
 connection.onDidCloseTextDocument((params) => {
 	// A text document got closed in VSCode.
 	// params.uri uniquely identifies the document.

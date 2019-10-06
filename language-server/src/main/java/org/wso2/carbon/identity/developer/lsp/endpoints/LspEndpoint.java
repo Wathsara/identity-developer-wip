@@ -104,7 +104,7 @@ public class LspEndpoint {
 
                 ParserT parserT = new ParserT();
 //                response.setId(String.valueOf(line) + " ----> "+ String.valueOf(charPosition));
-               response.setId(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition));
+                response.setId(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition));
 //                response.setResult(new JsonParser().parse(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition)));
             }
             if(response == null) {
