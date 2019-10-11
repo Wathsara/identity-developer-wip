@@ -18,16 +18,19 @@
 
 package org.wso2.carbon.identity.developer.lsp.endpoints;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import org.eclipse.lsp4j.CompletionItem;
 import org.wso2.carbon.identity.developer.lsp.LanguageProcessor;
 import org.wso2.carbon.identity.developer.lsp.LanguageProcessorFactory;
+import org.wso2.carbon.identity.developer.lsp.completion.CompletionListGenerator;
 import org.wso2.carbon.identity.jsonrpc.*;
+import org.wso2.carbon.identity.parser.JavaScriptLexer;
 import org.wso2.carbon.identity.parser.ParserT;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import javax.script.ScriptException;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -97,15 +100,39 @@ public class LspEndpoint {
                 //TODO: Descriptive error, no processor found
                 response = new SuccessResponse();
             } else {
-                JsonElement jsonElement1 = new JsonParser().parse(message);
-                JsonElement jsonElement2 = new JsonParser().parse(jsonElement1.getAsJsonObject().get("params").getAsString());
-                int line = Integer.parseInt(jsonElement2.getAsJsonObject().get("line").getAsString());
-                int charPosition = Integer.parseInt(jsonElement2.getAsJsonObject().get("character").getAsString());
+                if(request.getMethod().equals("onCompletion")){
+                    JsonElement jsonElement1 = new JsonParser().parse(message);
+                    JsonElement jsonElement2 = new JsonParser().parse(jsonElement1.getAsJsonObject().get("params").getAsString());
+                    int line = Integer.parseInt(jsonElement2.getAsJsonObject().get("line").getAsString());
+                    int charPosition = Integer.parseInt(jsonElement2.getAsJsonObject().get("character").getAsString());
 
-                ParserT parserT = new ParserT();
+                    List<CompletionItem> completionItems = new ArrayList<>();
+                    completionItems.add(new CompletionItem("First World"));
+                    completionItems.add(new CompletionItem("Second World"));
+                    completionItems.add(new CompletionItem("Third World"));
+                    completionItems.add(new CompletionItem("Forth World"));
+                    completionItems.add(new CompletionItem("Hii World"));
+
+                    ParserT parserT = new ParserT();
+                    String scope = parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition);
+
 //                response.setId(String.valueOf(line) + " ----> "+ String.valueOf(charPosition));
-                response.setId(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition));
+                    response.setId(scope);
+//                    response.setResult(new JsonParser().parse(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition)));
+                    response.setResult(new CompletionListGenerator().getList(scope));
+
+                }else{
+                    List<CompletionItem> completionItems = new ArrayList<>();
+
+                    JsonElement jsonElement1 = new JsonParser().parse(message);
+                    JsonElement jsonElement2 = new JsonParser().parse(jsonElement1.getAsJsonObject().get("params").getAsString());
+
+                    ParserT parserT = new ParserT();
+//                response.setId(String.valueOf(line) + " ----> "+ String.valueOf(charPosition));
+                    response.setId(request.getMethod());
 //                response.setResult(new JsonParser().parse(parserT.generateParseTree(jsonElement2.getAsJsonObject().get("text").getAsString(),line,charPosition)));
+
+                }
             }
             if(response == null) {
                 //TODO: Descriptive error

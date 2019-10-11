@@ -20,6 +20,8 @@ package org.wso2.carbon.identity.jsonrpc;
 
 import com.google.gson.JsonElement;
 
+import java.util.HashMap;
+
 /**
  * JSON-RPC success response
  *

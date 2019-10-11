@@ -1,5 +1,6 @@
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/parser/JavaScriptParserVisitor.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/jsonrpc/serializer/ErrorResponseSerializer.java
+/home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/developer/lsp/completion/Keywords.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/parser/JavaScriptLexer.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/developer/lsp/LanguageProcessorFactory.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/developer/lsp/endpoints/LspEndpoint.java
@@ -15,6 +16,7 @@
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/developer/lsp/language/sp/AuthenticationScriptProcessor.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/parser/SyntaxError.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/parser/JavaScriptParserListener.java
+/home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/developer/lsp/completion/CompletionListGenerator.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/jsonrpc/Response.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/parser/ParserT.java
 /home/wathsara/Desktop/identity-developer-wip/language-server/src/main/java/org/wso2/carbon/identity/parser/JavaScriptErrorListner.java

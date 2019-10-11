@@ -32,7 +32,11 @@
             <artifactId>kurento-jsonrpc-server</artifactId>
             <version>6.11.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+            <version>0.8.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.thetransactioncompany/jsonrpc2-base -->
         <dependency>
             <groupId>com.thetransactioncompany</groupId>

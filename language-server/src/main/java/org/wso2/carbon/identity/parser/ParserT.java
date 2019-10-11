@@ -2,14 +2,12 @@ package org.wso2.carbon.identity.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import javax.script.ScriptException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class ParserT {
@@ -22,15 +20,6 @@ public class ParserT {
         scope = null;
 
     }
-
-    public  String getScope() {
-        return scope;
-    }
-
-    public  void setScope(String scope) {
-        this.scope = scope;
-    }
-
 
     public  List getMyList() {
         return myList;
@@ -63,6 +52,7 @@ public class ParserT {
             map.put("column", token.getCharPositionInLine());
             map.put("type",JavaScriptLexer.VOCABULARY.getSymbolicName(token.getType()));
             map.put("text", token.getText());
+
         }else {
             List<Map<String, Object>> children = new ArrayList<>();
             String name = tree.getClass().getSimpleName().replaceAll("Context$", "");
@@ -99,15 +89,25 @@ public class ParserT {
             JavaScriptLexer javaScriptLexer =new JavaScriptLexer(charStream);
             CommonTokenStream commonTokenStream = new CommonTokenStream(javaScriptLexer);
             JavaScriptParser javaScriptParser = new JavaScriptParser(commonTokenStream);
-            javaScriptParser.removeErrorListeners();
-            javaScriptParser.addErrorListener(new JavaScriptErrorListner());
             ParseTree parseTree = javaScriptParser.program();
-
             return this.toMap(parseTree,line,charPosition);
         }catch (Exception e){
            System.out.println(e);
 
         }
-        return this.getScope();
+        return "Program";
     }
+
+    public void errors(String code){
+        CharStream charStream = CharStreams.fromString(code);
+        JavaScriptLexer javaScriptLexer =new JavaScriptLexer(charStream);
+        CommonTokenStream commonTokenStream = new CommonTokenStream(javaScriptLexer);
+        JavaScriptParser javaScriptParser = new JavaScriptParser(commonTokenStream);
+        javaScriptParser.removeErrorListeners();
+        JavaScriptErrorListner javaScriptErrorListner = new JavaScriptErrorListner();
+        javaScriptParser.addErrorListener(javaScriptErrorListner);
+        JsonObject object = new JsonObject();
+
+    }
+
 }

@@ -17,6 +17,7 @@ import {
 	TextDocumentPositionParams
 } from 'vscode-languageserver';
 
+import * as vscode from 'vscode';
 import * as rpc from 'vscode-ws-jsonrpc';
 import * as server from 'vscode-ws-jsonrpc/lib/server';
 import { stringify } from 'querystring';
@@ -124,18 +125,40 @@ var text:String;
 documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 	text = change.document.getText();
-	console.log(change)
-
-	
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	// In this simple example we get the settings for every validate run.
-	let settings = await getDocumentSettings(textDocument.uri);
+	let settings = await getDocumentSettings(textDocument.uri);	
 
 	// The validator creates diagnostics for all uppercase words length 2 and more
 	let text = textDocument.getText();
+
+	var WebSocket = require('ws');
+	var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');		
+	var obj:any = {
+		"text" : text,			
+	};
+	var output = <JSON>obj;
+	// rpc.listen({
+	// 	webSocket,
+	// 	onConnection: (rpcConnection: rpc.MessageConnection) => {
+	// 		const notification = new rpc.NotificationType<any, void>('validate');
+	// 		rpcConnection.listen();				
+	// 		rpcConnection.sendNotification(notification, JSON.stringify(output));
+	// 		console.log("yawwa spaams+ " + output);
+	// 	},
+	// });	
+
+	// await webSocket.on('message', function incoming(data: any) {				
+	// 	console.log("Recieved "+data);
+	// 	console.log("Recieved data type "+ typeof data);
+	// 	let obj = JSON.parse(data);
+	// 	console.log("Recieved id type "+ obj.id);
+	// 	recieveData = obj.id;			
+	// });	
+
 	let pattern = /\b[A-Z]{2,}\b/g;
 	let m: RegExpExecArray | null;
 
@@ -182,12 +205,12 @@ connection.onDidChangeWatchedFiles(_change => {
 });
 var recieveData:any = "hi";
 // This handler provides the initial list of the completion items.
+let completionList:CompletionItem[] = [];
 connection.onCompletion(
 	async (_textDocumentPosition: TextDocumentPositionParams): Promise<CompletionItem[]> => {
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the example we ignore this
-		// info and always provide the same completion items.
-		
+		// info and always provide the same completion items.		
 		var WebSocket = require('ws');
 		var webSocket = new WebSocket('ws://localhost:8080/lsp/lsp');		
 		var obj:any = {
@@ -202,31 +225,33 @@ connection.onCompletion(
 				const notification = new rpc.NotificationType<any, void>('onCompletion');
 				rpcConnection.listen();				
 				rpcConnection.sendNotification(notification, JSON.stringify(output));
-				console.log("yawwa spaams+ " + output);
+				console.log("yawwa spaams+ " + output);				
 			},
 		});	
 
 		await webSocket.on('message', function incoming(data: any) {				
 			console.log("Recieved "+data);
 			console.log("Recieved data type "+ typeof data);
-			let obj = JSON.parse(data);
-			console.log("Recieved id type "+ obj.id);
-			recieveData = obj.id;			
+			let obj = JSON.parse(data);			
+			console.log("Recieved id type "+ JSON.stringify(obj.result.re));
+			recieveData = obj.result;	
+			var jsonData = JSON.parse(JSON.stringify(obj.result.re));
+			completionList=[];
+			for (var i = 0; i < jsonData.length; i++) {
+				var counter = jsonData[i];
+				var jsonob = {
+					label: String(counter.label),
+					kind: counter.kind,
+					data: 1,
+					insertText: counter.insertText
+				};
+				completionList.push(jsonob);
+				console.log(counter.id);
+			}		
 		});	
 
 		var initialize = "null";
-		return [
-			{
-				label: initialize,
-				kind: CompletionItemKind.Text,
-				data: 1
-			},			
-			{
-				label: recieveData,
-				kind: CompletionItemKind.Text,
-				data: 2
-			}
-		];	
+		return completionList;
 		
 
 	}
